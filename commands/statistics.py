@@ -1,11 +1,11 @@
 from request import Request
 from peewee import *
-from core import BaseCommand
+from core import QueryCommand
 
-class StatisticsCommand(BaseCommand):
+class StatisticsCommand(QueryCommand):
 
     def __init__(self, handlers):
-        super(StatisticsCommand, self).__init__(
+        super(self.__class__, self).__init__(
             choices=[item.display_col for item in handlers.values()],
             handlers=handlers,
             arg='s',
@@ -17,5 +17,5 @@ class StatisticsCommand(BaseCommand):
                     ('Last Captured',fn.Max(Request.captured))]
         )
 
-    def query(self):
+    def query(self, handlers, args):
         return self.select().group_by(Request.type)

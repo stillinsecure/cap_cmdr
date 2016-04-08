@@ -1,3 +1,4 @@
+import utility
 from dpkt import dhcp, ip, ethernet
 from core import BaseHandler, ProtocolDef
 
@@ -13,3 +14,9 @@ class DHCPHandler(BaseHandler):
 
         if dhcp_pkt.op == dhcp.DHCP_OP_REQUEST:
             return self.protocol_def.key, 'N/A', dhcp.DHCP_OP_REQUEST
+
+    def format_query(self, query, sub_type):
+        return query
+
+    def format_sub_type(self, sub_type):
+        return 'DHCP'

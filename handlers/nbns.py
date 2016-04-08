@@ -14,3 +14,9 @@ class NBNSHandler(BaseHandler):
         for ques in dns_pkt.qd:
             query = netbios.decode_name(ques.name)
             return self.protocol_def.key, query, 0
+
+    def format_query(self, query, sub_type):
+        return query
+
+    def format_sub_type(self, sub_type):
+        return 'NBNS'

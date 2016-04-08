@@ -16,15 +16,38 @@ class BaseCommand(object):
         return re.sub(' ', '', value)
 
     def get_field_names(self):
+        if self.fields is None:
+            return None
         field_names = [item[0] for item in self.fields]
         return self.layout.format(*field_names)
 
-    def exec_query(self, handlers):
+    def get_cmd_regex(self):
+        cmd_reg_ex = '^({0})'.format(self.arg)
+        if self.choices is not None:
+            cmd_reg_ex += '\s*(?i)('
+            for choice in self.choices:
+                cmd_reg_ex += '{0}|'.format(choice)
+            cmd_reg_ex += ')'
+        cmd_reg_ex += '$'
+        return cmd_reg_ex
 
-        select_qry = self.query().dicts()
+class ActionCommand(BaseCommand):
+
+    def execute(self, handlers, args):
+        result = self.query(handlers, args)
+        return result
+
+class QueryCommand(BaseCommand):
+
+    def execute(self, handlers, args):
+        select_qry = self.query(handlers, args).dicts()
 
         for values in select_qry:
             row = []
+            if Request.sub_type.name in values:
+                sub_type = values[Request.sub_type.name]
+            else:
+                sub_type = None
             for alias, field in self.fields:
                 key = self.sanitize_field_name(alias)
                 value = values[key]
@@ -36,21 +59,12 @@ class BaseCommand(object):
                 elif field.db_column == Request.mac.name:
                     value = utility.int_to_mac(value)
                 elif field.db_column == Request.query.name:
-                    pass
+                    if sub_type is not None:
+                        value = handler.format_query(value, sub_type)
                 elif field.db_column == Request.sub_type.name:
                     value = handler.format_sub_type(value)
                 row.append(value)
             yield self.layout.format(*row)
-
-    def get_cmd_regex(self):
-        cmd_reg_ex = '^({0})'.format(self.arg)
-        if self.choices is not None:
-            cmd_reg_ex += '\s*(?i)('
-            for choice in self.choices:
-                cmd_reg_ex += '{0}|'.format(choice)
-            cmd_reg_ex += ')'
-        cmd_reg_ex += '$'
-        return cmd_reg_ex
 
     def select(self):
         temp = []

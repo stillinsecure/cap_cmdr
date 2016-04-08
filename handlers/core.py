@@ -14,4 +14,3 @@ class BaseHandler(object):
     def __init__(self, protocol_def, display_col):
         self.protocol_def = protocol_def
         self.display_col = display_col
-

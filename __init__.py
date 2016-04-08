@@ -10,4 +10,5 @@ def display_results(field_names, results):
 while True:
     user_input = raw_input('#>')
     field_names, results = mgr.exec_command(user_input)
-    display_results(field_names, results)
+    if results is not None:
+        display_results(field_names, results)
